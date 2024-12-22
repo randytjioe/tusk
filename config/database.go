@@ -2,15 +2,18 @@ package config
 
 import (
 	"fmt"
+	"tusk/models"
+
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 const (
 	host     = "localhost"
-	port     = 3310
-	user     = "root"
-	password = ""
+	port     = 3306
+	user     = "randytjioe"
+	password = "Randy123!"
 	dbName   = "tusk"
 )
 
@@ -29,4 +32,20 @@ func DatabaseConnection() *gorm.DB {
 		panic(err)
 	}
 	return database
+}
+
+func CreateOwnerAccount(db *gorm.DB) {
+	hashedPasswordBytes, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
+	owner := models.User{
+		Role: "Admin",
+		Name: "Admin",
+		Email: "owner@go.id",
+		Password: string(hashedPasswordBytes),
+	}
+
+	if db.Where("email = ?", owner.Email).First(&owner).RowsAffected == 0 {
+		db.Create(&owner)
+	} else {
+		fmt.Println("Owner account already exists")
+	}
 }
